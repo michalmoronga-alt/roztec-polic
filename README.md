@@ -35,4 +35,4 @@ Pri zmene súborov zvýš verziu `CACHE` v `sw.js`, inak môžu nainštalované 
 
 Publikovanie: po každom pushi do `main` workflow `.github/workflows/pages.yml` spustí testy a skopíruje web do vetvy `gh-pages`. Z tej vetvy beží GitHub Pages.
 
-v1.0
+v1.1

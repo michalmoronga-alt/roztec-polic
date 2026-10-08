@@ -1,5 +1,5 @@
 // Service worker — offline cache. Pri zmene súborov zvýš verziu CACHE.
-const CACHE = 'roztec-polic-v1.0.0';
+const CACHE = 'roztec-polic-v1.1.0';
 const ASSETS = [
   './', './index.html', './css/app.css', './js/app.js', './js/calc.js', './js/draw.js',
   './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png',

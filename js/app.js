@@ -2,9 +2,9 @@
 import { parseNum, calcShelves, formatMm, roundTo, ERROR_TEXT } from './calc.js';
 import { renderSection } from './draw.js';
 
-const VERSION = '1.0';
+const VERSION = '1.1';
 const KEY = 'roztec-polic:v1';
-const DEFAULTS = { mode: 'outer', h: '720', t: '18', n: '2', round: 0.5, ref: 'inner' };
+const DEFAULTS = { mode: 'outer', h: '720', t: '18', n: '2', round: 0.5, ref: 'inner', more: false };
 const MAX_N = 50;
 
 const $ = id => document.getElementById(id);
@@ -17,6 +17,14 @@ function load() {
 const S = load();
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* súkromný režim */ } };
 
+let last = null, printing = false;
+function drawNow() {
+  if (!last) return;
+  const wrap = $('svgWrap');
+  const size = printing ? { width: 420, height: 520 } : { width: wrap.clientWidth || 394, height: wrap.clientHeight || 492 };
+  wrap.innerHTML = renderSection(last.R, { step: last.step, ref: S.ref, ...size });
+}
+
 const mm = (v, step, fixed) => `${formatMm(v, step, fixed)}<span>mm</span>`;
 
 function render() {
@@ -28,13 +36,13 @@ function render() {
   $$('#mode button').forEach(b => { const on = b.dataset.v === S.mode; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   $$('#refSeg button').forEach(b => { const on = b.dataset.r === S.ref; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   $$('#chips .chip').forEach(c => c.classList.toggle('on', Number(c.dataset.t) === thickness));
-  $('hLabel').textContent = S.mode === 'outer' ? 'Vonkajšia výška korpusu' : 'Vnútorná (svetlá) výška';
+  $$('#roundSeg button').forEach(b => { const on = Number(b.dataset.s) === step; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  $('morePanel').classList.toggle('open', !!S.more);
+  $('moreBtn').setAttribute('aria-expanded', !!S.more);
+  $('hLabel').textContent = S.mode === 'outer' ? 'Vonkajšia výška' : 'Vnútorná (svetlá) výška';
   $('hBox').classList.toggle('bad', R.error === 'height');
   $('tBox').classList.toggle('bad', R.error === 'thickness');
   $('nBox').classList.toggle('bad', R.error === 'count');
-  $('hHint').innerHTML = R.outer > 0 && R.inner > 0
-    ? (S.mode === 'outer' ? `Vnútorná výška: <b>${formatMm(R.inner, step)}</b> mm (− 2 × hrúbka)` : `Vonkajšia výška: <b>${formatMm(R.outer, step)}</b> mm (+ 2 × hrúbka)`)
-    : '&nbsp;';
   const err = $('err');
   err.textContent = R.error ? ERROR_TEXT[R.error] : '';
   err.classList.toggle('show', !!R.error);
@@ -43,14 +51,13 @@ function render() {
   $('hero').classList.toggle('err', !R.ok);
   $('gapV').innerHTML = R.ok ? mm(R.gap, step, true) : '—<span>mm</span>';
   const exact = R.ok && Math.abs(roundTo(R.gap, step) - R.gap) > 0.005;
-  $('exact').textContent = exact ? `presne ${R.gap.toLocaleString('sk-SK', { maximumFractionDigits: 2 })} mm` : '';
-  $('innerV').innerHTML = R.inner > 0 ? mm(R.inner, step) : '—<span>mm</span>';
-  $('pitchV').innerHTML = R.ok && R.count > 0 ? mm(R.pitch, step) : '—<span>mm</span>';
-  $('gapsV').innerHTML = Number.isInteger(R.count) && R.count >= 0 ? `${R.count + 1}<span>×</span>` : '—';
-  const pill = $('pill');
-  pill.innerHTML = R.ok ? `${formatMm(R.gap, step, true)} mm` : '—';
-  pill.classList.toggle('err', !R.ok);
-  $('refLabel').textContent = S.ref === 'outer' ? 'od spodnej hrany korpusu' : 'od vnútorného dna';
+  $('exact').textContent = exact ? `· presne ${R.gap.toLocaleString('sk-SK', { maximumFractionDigits: 2 })}` : '';
+  $('innerV').textContent = R.inner > 0 ? formatMm(R.inner, step) : '—';
+  $('pitchV').textContent = R.ok && R.count > 0 ? formatMm(R.pitch, step) : '—';
+  $('gapsV').textContent = Number.isInteger(R.count) && R.count >= 0 ? `${R.count + 1}×` : '—';
+  const refTxt = S.ref === 'outer' ? 'od spodnej hrany korpusu' : 'od vnútorného dna';
+  $('refLabel').textContent = refTxt;
+  $('refLabel2').textContent = 'výšky ' + refTxt;
 
   // tabuľka (zhora nadol ako v skrinke)
   let rows = '';
@@ -68,7 +75,8 @@ function render() {
   $('tbody').innerHTML = rows;
   $('print').disabled = !R.ok;
 
-  $('svgWrap').innerHTML = renderSection(R, { step, ref: S.ref });
+  last = { R, step };
+  drawNow();
 
   // súhrn pre tlač
   $('printSummary').innerHTML = R.ok
@@ -98,15 +106,17 @@ $('plus').addEventListener('click', () => setN((parseInt(S.n, 10) || 0) + 1));
 $$('#mode button').forEach(b => b.addEventListener('click', () => { S.mode = b.dataset.v; render(); }));
 $$('#refSeg button').forEach(b => b.addEventListener('click', () => { S.ref = b.dataset.r; render(); }));
 $$('#chips .chip').forEach(c => c.addEventListener('click', () => { S.t = c.dataset.t; $('t').value = S.t; render(); }));
-const roundSel = $('round');
-roundSel.value = String(S.round);
-roundSel.addEventListener('change', () => { S.round = Number(roundSel.value); render(); });
+$$('#roundSeg button').forEach(b => b.addEventListener('click', () => { S.round = Number(b.dataset.s); render(); }));
+$('moreBtn').addEventListener('click', () => { S.more = !S.more; render(); });
 $('print').addEventListener('click', () => window.print());
 
-// výsledok v hlavičke, keď veľká karta zmizne z obrazovky (mobil)
-if ('IntersectionObserver' in window) {
-  new IntersectionObserver(([e]) => { $('pill').hidden = e.isIntersecting; }, { rootMargin: '-56px 0px 0px 0px' }).observe($('hero'));
+// nákres sa prekreslí pri zmene veľkosti plochy (otočenie, klávesnica, okno)
+if ('ResizeObserver' in window) {
+  let raf = 0;
+  new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(drawNow); }).observe($('svgWrap'));
 }
+window.addEventListener('beforeprint', () => { printing = true; drawNow(); });
+window.addEventListener('afterprint', () => { printing = false; drawNow(); });
 
 render();
 

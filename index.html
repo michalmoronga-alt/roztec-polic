@@ -20,98 +20,95 @@
 <div class="app">
   <header class="top">
     <div class="logo" aria-hidden="true">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.6"><rect x="2.5" y="1.5" width="11" height="13" rx="1"/><path d="M2.5 6h11M2.5 10h11"/></svg>
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2.5" y="1.5" width="11" height="13" rx="1"/><path d="M2.5 6h11M2.5 10h11"/></svg>
     </div>
     <h1>Rozteč políc</h1>
     <span class="sub">výpočet svetlého priestoru medzi policami</span>
     <span class="spacer"></span>
-    <span class="pill" id="pill" aria-live="polite" hidden>216,0 mm</span>
-    <span class="ver">v1.0</span>
+    <span class="ver">v1.1</span>
   </header>
 
   <main id="main">
-    <section class="card inputs" aria-label="Zadanie">
-      <div class="card-h hide-m"><h2>Zadanie</h2></div>
-      <div class="card-b">
-        <div class="field">
-          <div class="seg" id="mode" role="radiogroup" aria-label="Rozmer skrinky">
-            <button type="button" role="radio" data-v="inner">Vnútorná výška</button>
-            <button type="button" role="radio" data-v="outer">Vonkajšia výška</button>
+    <div class="print-only print-summary" id="printSummary"></div>
+
+    <div class="screen">
+      <!-- ZADANIE -->
+      <section class="card inputs" aria-label="Zadanie">
+        <div class="row r1">
+          <div class="seg mode" id="mode" role="radiogroup" aria-label="Rozmer skrinky">
+            <button type="button" role="radio" data-v="inner" title="Vnútorná výška">Vnút.</button>
+            <button type="button" role="radio" data-v="outer" title="Vonkajšia výška">Vonk.</button>
           </div>
+          <label class="inp grow" id="hBox"><span class="lab" id="hLabel">Vonkajšia výška</span>
+            <input id="h" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" spellcheck="false"><span class="unit">mm</span></label>
         </div>
-        <div class="field">
-          <label class="label" for="h"><span id="hLabel">Vonkajšia výška korpusu</span></label>
-          <div class="inp" id="hBox"><input id="h" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" spellcheck="false"><span class="unit">mm</span></div>
-          <div class="hint" id="hHint"></div>
-        </div>
-        <div class="row2">
-          <div class="field">
-            <label class="label" for="t">Hrúbka materiálu</label>
-            <div class="inp" id="tBox"><input id="t" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" spellcheck="false"><span class="unit">mm</span></div>
+        <div class="row r2">
+          <label class="inp t" id="tBox"><span class="lab">Hrúbka</span>
+            <input id="t" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" spellcheck="false"><span class="unit">mm</span></label>
+          <div class="stepper grow" id="nBox">
+            <button type="button" id="minus" aria-label="Menej políc">−</button>
+            <label class="stp-mid"><span class="lab">Police</span><input id="n" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" aria-label="Počet políc"></label>
+            <button type="button" id="plus" aria-label="Viac políc">+</button>
           </div>
-          <div class="field">
-            <label class="label" for="n">Počet políc</label>
-            <div class="stepper" id="nBox">
-              <button type="button" id="minus" aria-label="Menej políc">−</button>
-              <input id="n" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" aria-label="Počet políc">
-              <button type="button" id="plus" aria-label="Viac políc">+</button>
-            </div>
-          </div>
+          <button type="button" class="more-btn" id="moreBtn" aria-expanded="false" aria-controls="morePanel" title="Viac nastavení">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 6h9M15 6h2M3 14h2M8 14h9"/><circle cx="13.5" cy="6" r="1.8"/><circle cx="6.5" cy="14" r="1.8"/></svg>
+          </button>
         </div>
-        <div class="chips" id="chips" aria-label="Rýchla voľba hrúbky">
-          <button type="button" class="chip" data-t="16">16</button><button type="button" class="chip" data-t="18">18</button><button type="button" class="chip" data-t="19">19</button><button type="button" class="chip" data-t="22">22</button><button type="button" class="chip" data-t="25">25</button>
+        <div class="more" id="morePanel">
+          <div class="opt"><span class="opt-l">Hrúbka</span>
+            <div class="chips" id="chips"><button type="button" class="chip" data-t="16">16</button><button type="button" class="chip" data-t="18">18</button><button type="button" class="chip" data-t="19">19</button><button type="button" class="chip" data-t="22">22</button><button type="button" class="chip" data-t="25">25</button></div>
+          </div>
+          <div class="opt"><span class="opt-l">Výšky od</span>
+            <div class="mini-seg" id="refSeg" role="radiogroup" aria-label="Výšky merané od"><button type="button" data-r="inner">vnút. dna</button><button type="button" data-r="outer">spodnej hrany</button></div>
+          </div>
+          <div class="opt"><span class="opt-l">Zaokrúhlenie</span>
+            <div class="mini-seg" id="roundSeg" role="radiogroup" aria-label="Zaokrúhlenie"><button type="button" data-s="0.1">0,1</button><button type="button" data-s="0.5">0,5</button><button type="button" data-s="1">1 mm</button></div>
+          </div>
         </div>
         <div class="error-box" id="err" role="alert"></div>
-      </div>
-    </section>
+      </section>
 
-    <section class="right">
-      <div class="stats">
-        <div class="card stat hero" id="hero">
-          <div><div class="k">Svetlý priestor medzi policami</div><div class="exact" id="exact"></div></div>
+      <!-- VÝSLEDOK -->
+      <section class="card strip" id="hero" aria-live="polite">
+        <div class="gapbox">
+          <div class="k">Svetlý priestor <span class="exact" id="exact"></span></div>
           <div class="v" id="gapV">—</div>
         </div>
-        <div class="card stat"><div class="k">Vnútorná výška</div><div class="v" id="innerV">—</div></div>
-        <div class="card stat"><div class="k">Rozteč osí</div><div class="v" id="pitchV">—</div></div>
-        <div class="card stat"><div class="k">Medzier</div><div class="v" id="gapsV">—</div></div>
-      </div>
-
-      <div class="grid2">
-        <div class="card drawing">
-          <div class="card-h"><h2>Nákres — rez</h2>
-            <div class="mini-seg" id="refSeg" role="radiogroup" aria-label="Merané od">
-              <button type="button" data-r="inner">od vnút. dna</button><button type="button" data-r="outer">od spodnej hrany</button>
-            </div>
-          </div>
-          <div id="svgWrap" class="svg-wrap"></div>
-          <div class="legend">
-            <span><i class="lg-wood"></i>korpus</span><span><i class="lg-shelf"></i>police</span><span><i class="lg-gap"></i>svetlý priestor</span><span><i class="lg-ink"></i>výšky od dna</span>
-          </div>
+        <div class="minis">
+          <div><span class="k">Vnútorná</span><b id="innerV">—</b></div>
+          <div><span class="k">Rozteč osí</span><b id="pitchV">—</b></div>
+          <div class="hide-m"><span class="k">Medzier</span><b id="gapsV">—</b></div>
         </div>
+      </section>
 
-        <div class="card">
-          <div class="card-h"><h2>Výšky políc</h2><span class="muted" id="refLabel">od vnútorného dna</span></div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Polica</th><th>Spodná<span class="hide-s"> hrana</span></th><th>Horná<span class="hide-s"> hrana</span></th><th>Os</th></tr></thead>
-              <tbody id="tbody"></tbody>
-            </table>
-          </div>
-          <div class="tfoot">
-            <button type="button" class="btn primary" id="print">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6V2h8v4M4 12H2.5V6.5h11V12H12M4 9.5h8V14H4z"/></svg>
-              Uložiť PDF / tlačiť
-            </button>
-            <label class="round">Zaokrúhlenie
-              <select id="round"><option value="0.1">0,1 mm</option><option value="0.5">0,5 mm</option><option value="1">1 mm</option></select>
-            </label>
-          </div>
+      <!-- NÁKRES -->
+      <section class="card drawing">
+        <div class="card-h hide-m"><h2>Nákres — rez</h2><span class="muted" id="refLabel2">výšky od vnútorného dna</span></div>
+        <div id="svgWrap" class="svg-wrap"></div>
+        <div class="legend hide-m">
+          <span><i class="lg-wood"></i>korpus</span><span><i class="lg-shelf"></i>police</span><span><i class="lg-gap"></i>svetlý priestor</span><span><i class="lg-ink"></i>výšky od dna</span>
         </div>
+      </section>
+    </div>
+
+    <!-- TABUĽKA -->
+    <section class="card tablecard">
+      <div class="card-h"><h2>Výšky políc</h2><span class="muted" id="refLabel">od vnútorného dna</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Polica</th><th>Spodná<span class="hide-s"> hrana</span></th><th>Horná<span class="hide-s"> hrana</span></th><th>Os</th></tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
-      <div class="print-only print-summary" id="printSummary"></div>
+      <div class="tfoot">
+        <button type="button" class="btn primary" id="print">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6V2h8v4M4 12H2.5V6.5h11V12H12M4 9.5h8V14H4z"/></svg>
+          Uložiť PDF / tlačiť
+        </button>
+      </div>
     </section>
   </main>
-  <footer>Hodnoty v mm · rovnaké medzery · dno, strop a police rovnakej hrúbky · v1.0</footer>
+  <footer>Hodnoty v mm · rovnaké medzery · dno, strop a police rovnakej hrúbky · v1.1</footer>
 </div>
 </body>
 </html>
