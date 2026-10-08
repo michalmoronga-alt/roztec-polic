@@ -31,8 +31,8 @@ rozteč osí = medzera + t
 
 Nemá build krok ani závislosti, sú to čisté HTML/CSS/JS súbory. Lokálne ho spusti cez ľubovoľný statický server, napr. `python3 -m http.server`. ES moduly sa nedajú otvoriť priamo cez `file://`.
 
-Pri zmene súborov zvýš verziu `CACHE` v `sw.js`, inak môžu nainštalované appky ostať na starej verzii.
+Pri novej verzii zvýš číslo verzie na všetkých miestach: `VERSION` v `sw.js` a v `js/app.js`, `?v=` v `index.html` (CSS a JS) a v importoch v `js/app.js` a `js/draw.js`, plus `v…` v hlavičke a päte. Súbory s `?v=` sa cachujú natrvalo, HTML sa vždy načíta zo siete. Nová verzia sa v telefóne načíta sama, najviac s jedným automatickým obnovením stránky.
 
 Publikovanie: po každom pushi do `main` workflow `.github/workflows/pages.yml` spustí testy a skopíruje web do vetvy `gh-pages`. Z tej vetvy beží GitHub Pages.
 
-v1.1
+v1.1.1

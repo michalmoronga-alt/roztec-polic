@@ -1,6 +1,6 @@
 // draw.js — SVG nákres rezu korpusu. Vstup = výsledok calcShelves(). Bez DOM, vracia SVG string.
 // width/height = veľkosť plochy v px (1 jednotka SVG = 1 px), nákres sa prispôsobí.
-import { formatMm } from './calc.js';
+import { formatMm } from './calc.js?v=1.1.1';
 
 export function renderSection(R, { step = 0.5, ref = 'inner', width = 394, height = 492 } = {}) {
   const Wv = Math.max(260, Math.round(width)), Hv = Math.max(200, Math.round(height));
