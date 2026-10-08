@@ -1,8 +1,8 @@
 // app.js — UI vrstva (DOM, stav, localStorage). Výpočet je v calc.js, nákres v draw.js.
-import { parseNum, calcShelves, formatMm, roundTo, ERROR_TEXT } from './calc.js';
-import { renderSection } from './draw.js';
+import { parseNum, calcShelves, formatMm, roundTo, ERROR_TEXT } from './calc.js?v=1.1.1';
+import { renderSection } from './draw.js?v=1.1.1';
 
-const VERSION = '1.1';
+const VERSION = '1.1.1';
 const KEY = 'roztec-polic:v1';
 const DEFAULTS = { mode: 'outer', h: '720', t: '18', n: '2', round: 0.5, ref: 'inner', more: false };
 const MAX_N = 50;
@@ -22,12 +22,25 @@ function drawNow() {
   if (!last) return;
   const wrap = $('svgWrap');
   const size = printing ? { width: 420, height: 520 } : { width: wrap.clientWidth || 394, height: wrap.clientHeight || 492 };
-  wrap.innerHTML = renderSection(last.R, { step: last.step, ref: S.ref, ...size });
+  try {
+    wrap.innerHTML = renderSection(last.R, { step: last.step, ref: S.ref, ...size });
+  } catch (e) {
+    console.error(e);
+    wrap.innerHTML = '<p style="padding:16px;color:#d24b4b;font-size:13px">Nákres sa nepodarilo vykresliť. Výsledky hore a v tabuľke platia.</p>';
+  }
 }
 
 const mm = (v, step, fixed) => `${formatMm(v, step, fixed)}<span>mm</span>`;
 
 function render() {
+  try { renderInner(); } catch (e) {
+    console.error(e);
+    const err = $('err');
+    if (err) { err.textContent = 'Chyba vo výpočte: ' + e.message; err.classList.add('show'); }
+  }
+}
+
+function renderInner() {
   const height = parseNum(S.h), thickness = parseNum(S.t), count = parseNum(S.n);
   const R = calcShelves({ height, mode: S.mode, thickness, count });
   const step = Number(S.round), off = S.ref === 'outer' ? R.thickness : 0;
@@ -119,9 +132,24 @@ window.addEventListener('beforeprint', () => { printing = true; drawNow(); });
 window.addEventListener('afterprint', () => { printing = false; drawNow(); });
 
 render();
+window.__appReady = true;
+if ($('fatal')) $('fatal').hidden = true;
 
-// PWA — offline
+// PWA — offline + automatická aktualizácia
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloading = false;
+  // nová verzia prevzala stránku → raz načítaj znova (pri prvej inštalácii nie)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    location.reload();
+  });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => {
+      // pri návrate do appky (z pozadia) skontroluj, či nie je nová verzia
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+    }).catch(() => {});
+  });
 }
 console.info(`Rozteč políc v${VERSION}`);

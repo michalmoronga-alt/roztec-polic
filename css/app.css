@@ -113,6 +113,8 @@ tr.msg td{text-align:center;color:var(--danger);padding:18px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 footer{color:var(--faint);font-size:12px;padding:4px 16px 24px;padding-bottom:max(24px,env(safe-area-inset-bottom));text-align:center}
 .print-only{display:none}
+.fatal{flex:none;border:1px solid #f3c4c4;background:var(--danger-soft);color:var(--danger);border-radius:10px;padding:10px 12px;font-size:13.5px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.fatal[hidden]{display:none!important}
 
 @media (max-width:360px){ .inp.t{flex-basis:86px} .seg button{min-width:44px} }
 

@@ -13,8 +13,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Rozteč políc">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="stylesheet" href="css/app.css">
-<script type="module" src="js/app.js"></script>
+<link rel="stylesheet" href="css/app.css?v=1.1.1">
+<script type="module" src="js/app.js?v=1.1.1"></script>
 </head>
 <body>
 <div class="app">
@@ -25,7 +25,7 @@
     <h1>Rozteč políc</h1>
     <span class="sub">výpočet svetlého priestoru medzi policami</span>
     <span class="spacer"></span>
-    <span class="ver">v1.1</span>
+    <span class="ver">v1.1.1</span>
   </header>
 
   <main id="main">
@@ -68,6 +68,8 @@
         <div class="error-box" id="err" role="alert"></div>
       </section>
 
+      <div class="fatal" id="fatal" hidden>Nepodarilo sa načítať appku (pravdepodobne stará verzia v pamäti). <button type="button" id="fatalBtn" class="btn primary">Obnoviť appku</button></div>
+
       <!-- VÝSLEDOK -->
       <section class="card strip" id="hero" aria-live="polite">
         <div class="gapbox">
@@ -108,7 +110,23 @@
       </div>
     </section>
   </main>
-  <footer>Hodnoty v mm · rovnaké medzery · dno, strop a police rovnakej hrúbky · v1.1</footer>
+  <footer>Hodnoty v mm · rovnaké medzery · dno, strop a police rovnakej hrúbky · v1.1.1</footer>
 </div>
+<script>
+// Poistka: ak sa appka nenačíta (napr. zmes starých a nových súborov), ukáž tlačidlo na obnovu.
+(function () {
+  function fix() {
+    var jobs = [];
+    if ('caches' in window) jobs.push(caches.keys().then(function (k) { return Promise.all(k.map(function (x) { return caches.delete(x); })); }));
+    if (navigator.serviceWorker) jobs.push(navigator.serviceWorker.getRegistrations().then(function (r) { return Promise.all(r.map(function (x) { return x.unregister(); })); }));
+    Promise.all(jobs).then(reload, reload);
+  }
+  function reload() { location.reload(); }
+  function show() { if (window.__appReady) return; var f = document.getElementById('fatal'); if (f) f.hidden = false; }
+  document.getElementById('fatalBtn').onclick = fix;
+  window.addEventListener('error', function () { setTimeout(show, 0); }, true);
+  setTimeout(show, 6000);
+})();
+</script>
 </body>
 </html>
