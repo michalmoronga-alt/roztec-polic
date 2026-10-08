@@ -1,0 +1,40 @@
+# Publikovanie na GitHub Pages (vetva gh-pages).
+# 1) Ak chýbajú PNG ikony, vygeneruje ich z icons/icon.svg a commitne do main.
+# 2) Celý web skopíruje do vetvy gh-pages (z nej beží GitHub Pages).
+name: Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vygenerovať PNG ikony (ak chýbajú)
+        run: |
+          if [ ! -f icons/icon-512.png ]; then
+            bash icons/gen-icons.sh
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add icons/*.png
+            git commit -m "Ikony PNG (vygenerované z icon.svg)"
+            git push origin HEAD:main
+          fi
+      - name: Testy výpočtu
+        run: node tests/calc.test.mjs
+      - name: Publikovať do gh-pages
+        run: |
+          rm -rf /tmp/site && mkdir /tmp/site
+          cp -r index.html manifest.webmanifest sw.js .nojekyll css js icons /tmp/site/ && rm -f /tmp/site/icons/gen-icons.sh
+          cd /tmp/site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -qm "Publikovanie ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git" gh-pages
